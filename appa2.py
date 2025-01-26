@@ -60,7 +60,7 @@ def generate_text(model, start_text, max_length, word2index, index2word):
     return ' '.join(words)
 
 # Load vocabulary and other resources
-with open("dataset(1).txt", "r", encoding="utf-8") as f:
+with open("dataset.txt", "r", encoding="utf-8") as f:
     text = f.read()
 
 tokens = preprocess_text(text)
