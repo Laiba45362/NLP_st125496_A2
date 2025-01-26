@@ -32,45 +32,49 @@ class LanguageModel(nn.Module):
 
 # Function to load and preprocess data
 def load_and_preprocess_data(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        text = file.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text = file.read()
 
-    # Tokenization
-    tokens = nltk.word_tokenize(text)
+        # Tokenization
+        tokens = nltk.word_tokenize(text)
 
-    # Lowercasing
-    tokens = [token.lower() for token in tokens]
+        # Lowercasing
+        tokens = [token.lower() for token in tokens]
 
-    # Removing punctuation and special characters
-    tokens = [re.sub(r'\W+', '', token) for token in tokens if re.sub(r'\W+', '', token)]
+        # Removing punctuation and special characters
+        tokens = [re.sub(r'\W+', '', token) for token in tokens if re.sub(r'\W+', '', token)]
 
-    # Removing stop words (optional)
-    stop_words = set(stopwords.words('english'))
-    tokens = [token for token in tokens if token not in stop_words]
+        # Removing stop words (optional)
+        stop_words = set(stopwords.words('english'))
+        tokens = [token for token in tokens if token not in stop_words]
 
-    # Add a special token for unknown words
-    tokens.append('<UNK>')
+        # Add a special token for unknown words
+        tokens.append('<UNK>')
 
-    # Numericalization
-    vocab = list(set(tokens))
-    word2index = {word: i for i, word in enumerate(vocab)}
-    index2word = {i: word for i, word in enumerate(vocab)}
+        # Numericalization
+        vocab = list(set(tokens))
+        word2index = {word: i for i, word in enumerate(vocab)}
+        index2word = {i: word for i, word in enumerate(vocab)}
 
-    # Creating sequences
-    sequence_length = 5
-    sequences = []
-    for i in range(len(tokens) - sequence_length):
-        sequences.append(tokens[i:i + sequence_length])
+        # Creating sequences
+        sequence_length = 5
+        sequences = []
+        for i in range(len(tokens) - sequence_length):
+            sequences.append(tokens[i:i + sequence_length])
 
-    # Convert sequences to numerical indices
-    input_sequences = []
-    for sequence in sequences:
-        input_sequences.append([word2index[word] for word in sequence])
+        # Convert sequences to numerical indices
+        input_sequences = []
+        for sequence in sequences:
+            input_sequences.append([word2index[word] for word in sequence])
 
-    # Convert to numpy array
-    input_sequences = np.array(input_sequences)
+        # Convert to numpy array
+        input_sequences = np.array(input_sequences)
 
-    return input_sequences, vocab, word2index, index2word
+        return input_sequences, vocab, word2index, index2word
+    except Exception as e:
+        st.error(f"An error occurred while processing the dataset: {e}")
+        return None, None, None, None
 
 # Function to generate text
 def generate_text(model, start_text, max_length, word2index, index2word):
@@ -132,27 +136,30 @@ if not os.path.exists(dataset_path):
 
 # Load dataset and preprocess it
 input_sequences, vocab, word2index, index2word = load_and_preprocess_data(dataset_path)
-st.write(f"Vocabulary size: {len(vocab)}")
-st.write(f"Total sequences: {len(input_sequences)}")
+if input_sequences is not None:
+    st.write(f"Vocabulary size: {len(vocab)}")
+    st.write(f"Total sequences: {len(input_sequences)}")
 
-# Load pre-trained model
-def load_pretrained_model():
-    model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
-    return model
+    # Load pre-trained model
+    def load_pretrained_model():
+        model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
+        model.load_state_dict(torch.load(model_path))
+        model.eval()
+        return model
 
-# Hyperparameters (based on the pre-trained model)
-embedding_dim = 50
-hidden_dim = 100
+    # Hyperparameters (based on the pre-trained model)
+    embedding_dim = 50
+    hidden_dim = 100
 
-# Generate text with pre-trained model
-model = load_pretrained_model()  # Load the model
+    # Generate text with pre-trained model
+    model = load_pretrained_model()  # Load the model
 
-# Text generation
-start_text = st.text_input("Enter the start text for text generation", "harry potter is")
-if st.button("Generate Text"):
-    with st.spinner('Generating text...'):
-        generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
-    st.write("Generated Text:")
-    st.markdown(f"<div style='padding: 10px; background-color: #e9ecef; color: #333333;'>{generated_text}</div>", unsafe_allow_html=True)
+    # Text generation
+    start_text = st.text_input("Enter the start text for text generation", "harry potter is")
+    if st.button("Generate Text"):
+        with st.spinner('Generating text...'):
+            generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
+        st.write("Generated Text:")
+        st.markdown(f"<div style='padding: 10px; background-color: #e9ecef; color: #333333;'>{generated_text}</div>", unsafe_allow_html=True)
+else:
+    st.error("Failed to load and preprocess the dataset.")
