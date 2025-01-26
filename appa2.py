@@ -117,18 +117,25 @@ st.write(f"Total sequences: {len(input_sequences)}")
 
 # Load pre-trained model
 def load_pretrained_model():
-    model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
-    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-    model.eval()
-    return model
+    try:
+        model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
+        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        model.eval()
+        return model
+    except Exception as e:
+        st.error(f"An error occurred while loading the model: {e}")
+        return None
 
 # Generate text with pre-trained model
 model = load_pretrained_model()  # Load the model
 
-# Text generation
-start_text = st.text_input("Enter the start text for text generation", "harry potter is")
-if st.button("Generate Text"):
-    with st.spinner('Generating text...'):
-        generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
-    st.write("Generated Text:")
-    st.write(generated_text)
+if model:
+    # Text generation
+    start_text = st.text_input("Enter the start text for text generation", "harry potter is")
+    if st.button("Generate Text"):
+        with st.spinner('Generating text...'):
+            generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
+        st.write("Generated Text:")
+        st.write(generated_text)
+else:
+    st.error("Failed to load the pre-trained model.")
