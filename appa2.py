@@ -72,7 +72,8 @@ def load_and_preprocess_data(file_path):
 
     return input_sequences, vocab, word2index, index2word
 
-def generate_text(model, start_text, word2index, index2word, max_length=50):
+# Function to generate text
+def generate_text(model, start_text, max_length, word2index, index2word):
     model.eval()
     words = start_text.split()
     state_h, state_c = model.init_state(batch_size=1)
@@ -87,22 +88,47 @@ def generate_text(model, start_text, word2index, index2word, max_length=50):
 
     return ' '.join(words)
 
-# Load the dataset and preprocess it
-dataset_path = 'dataset(1).txt'
-input_sequences, vocab, word2index, index2word = load_and_preprocess_data(dataset_path)
-
-# Load the trained model
-model_path = 'model.pth'
-model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
-model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-model.eval()
-
 # Streamlit app
 st.title("Text Generation with Pre-trained LSTM")
 
+# GitHub Repo URL for model and dataset
+github_model_url = 'https://github.com/St125050/nlpassignment2/blob/main/model.pth'  # Replace with your actual repo path
+github_dataset_url = 'https://github.com/St125050/nlpassignment2/blob/main/dataset.txt'  # Replace with your actual repo path
+
+# Local paths
+model_path = 'model.pth'
+dataset_path = 'dataset.txt'
+
+# Download model and dataset from GitHub if they are not available locally
+if not os.path.exists(model_path):
+    with open(model_path, 'wb') as f:
+        f.write(requests.get(github_model_url).content)
+    st.write("Model downloaded successfully.")
+
+if not os.path.exists(dataset_path):
+    with open(dataset_path, 'wb') as f:
+        f.write(requests.get(github_dataset_url).content)
+    st.write("Dataset downloaded successfully.")
+
+# Load dataset and preprocess it
+input_sequences, vocab, word2index, index2word = load_and_preprocess_data(dataset_path)
+st.write(f"Vocabulary size: {len(vocab)}")
+st.write(f"Total sequences: {len(input_sequences)}")
+
+# Load pre-trained model
+def load_pretrained_model():
+    model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
+    model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+    model.eval()
+    return model
+
+# Generate text with pre-trained model
+model = load_pretrained_model()  # Load the model
+
+# Text generation
 start_text = st.text_input("Enter the start text for text generation", "harry potter is")
 if st.button("Generate Text"):
     with st.spinner('Generating text...'):
-        generated_text = generate_text(model, start_text, word2index, index2word, max_length=50)
+        generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
     st.write("Generated Text:")
     st.write(generated_text)
