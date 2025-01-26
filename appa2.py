@@ -88,7 +88,7 @@ def generate_text(model, start_text, word2index, index2word, max_length=50):
     return ' '.join(words)
 
 # Load the dataset and preprocess it
-dataset_path = 'dataset.txt'
+dataset_path = 'dataset(1).txt'
 input_sequences, vocab, word2index, index2word = load_and_preprocess_data(dataset_path)
 
 # Load the trained model
