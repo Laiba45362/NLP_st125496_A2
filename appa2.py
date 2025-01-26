@@ -32,45 +32,49 @@ class LanguageModel(nn.Module):
 
 # Function to load and preprocess data
 def load_and_preprocess_data(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        text = file.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text = file.read()
 
-    # Tokenization
-    tokens = nltk.word_tokenize(text)
+        # Tokenization
+        tokens = nltk.word_tokenize(text)
 
-    # Lowercasing
-    tokens = [token.lower() for token in tokens]
+        # Lowercasing
+        tokens = [token.lower() for token in tokens]
 
-    # Removing punctuation and special characters
-    tokens = [re.sub(r'\W+', '', token) for token in tokens if re.sub(r'\W+', '', token)]
+        # Removing punctuation and special characters
+        tokens = [re.sub(r'\W+', '', token) for token in tokens if re.sub(r'\W+', '', token)]
 
-    # Removing stop words (optional)
-    stop_words = set(stopwords.words('english'))
-    tokens = [token for token in tokens if token not in stop_words]
+        # Removing stop words (optional)
+        stop_words = set(stopwords.words('english'))
+        tokens = [token for token in tokens if token not in stop_words]
 
-    # Add a special token for unknown words
-    tokens.append('<UNK>')
+        # Add a special token for unknown words
+        tokens.append('<UNK>')
 
-    # Numericalization
-    vocab = list(set(tokens))
-    word2index = {word: i for i, word in enumerate(vocab)}
-    index2word = {i: word for i, word in enumerate(vocab)}
+        # Numericalization
+        vocab = list(set(tokens))
+        word2index = {word: i for i, word in enumerate(vocab)}
+        index2word = {i: word for i, word in enumerate(vocab)}
 
-    # Creating sequences
-    sequence_length = 5
-    sequences = []
-    for i in range(len(tokens) - sequence_length):
-        sequences.append(tokens[i:i + sequence_length])
+        # Creating sequences
+        sequence_length = 5
+        sequences = []
+        for i in range(len(tokens) - sequence_length):
+            sequences.append(tokens[i:i + sequence_length])
 
-    # Convert sequences to numerical indices
-    input_sequences = []
-    for sequence in sequences:
-        input_sequences.append([word2index[word] for word in sequence])
+        # Convert sequences to numerical indices
+        input_sequences = []
+        for sequence in sequences:
+            input_sequences.append([word2index[word] for word in sequence])
 
-    # Convert to numpy array
-    input_sequences = np.array(input_sequences)
+        # Convert to numpy array
+        input_sequences = np.array(input_sequences)
 
-    return input_sequences, vocab, word2index, index2word
+        return input_sequences, vocab, word2index, index2word
+    except Exception as e:
+        st.error(f"An error occurred while processing the dataset: {e}")
+        return None, None, None, None
 
 # Function to generate text
 def generate_text(model, start_text, max_length, word2index, index2word):
@@ -92,8 +96,8 @@ def generate_text(model, start_text, max_length, word2index, index2word):
 st.title("Text Generation with Pre-trained LSTM")
 
 # GitHub Repo URL for model and dataset
-github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'  # Replace with your actual repo path
-github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset%20(1).txt'  # Replace with your actual repo path
+github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'
+correct_github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset(1).txt'  # Replace with the correct dataset URL used during training
 
 # Local paths
 model_path = 'model.pth'
@@ -107,7 +111,7 @@ if not os.path.exists(model_path):
 
 if not os.path.exists(dataset_path):
     with open(dataset_path, 'wb') as f:
-        f.write(requests.get(github_dataset_url).content)
+        f.write(requests.get(correct_github_dataset_url).content)
     st.write("Dataset downloaded successfully.")
 
 # Load dataset and preprocess it
