@@ -10,7 +10,6 @@ from nltk.corpus import stopwords
 
 # Ensure necessary NLTK data is available
 nltk.download('punkt')
-nltk.download('punkt_tab')  # Download punkt_tab tokenizer if missing
 nltk.download('stopwords')
 
 # Define the LanguageModel class
@@ -90,11 +89,54 @@ def generate_text(model, start_text, max_length, word2index, index2word):
     return ' '.join(words)
 
 # Streamlit app
+st.set_page_config(page_title="Text Generation with Pre-trained LSTM", page_icon=":pencil2:", layout="centered")
+
+# Custom CSS for styling
+st.markdown(
+    """
+    <style>
+    .main {
+        background-color: #f5f5f5;
+        color: #333333;
+    }
+    .stButton>button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 8px;
+    }
+    .stTextInput>div>div>input {
+        background-color: #e9ecef;
+        color: #333333;
+        padding: 10px;
+        border: 2px solid #007bff;
+        border-radius: 8px;
+    }
+    .stTextInput>div>div>label {
+        color: #007bff;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    h1 {
+        color: #007bff;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.title("Text Generation with Pre-trained LSTM")
 
 # GitHub Repo URL for model and dataset
-github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'  # Replace with your actual repo path
-github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset.txt'  # Replace with your actual repo path
+github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'
+github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset.txt'
 
 # Local paths
 model_path = 'model.pth'
@@ -118,21 +160,25 @@ st.write(f"Total sequences: {len(input_sequences)}")
 
 # Load pre-trained model
 def load_pretrained_model():
-    model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
-    model.load_state_dict(torch.load(model_path))
-    model.eval()
-    return model
-
-# Hyperparameters (based on the pre-trained model)
-embedding_dim = 50
-hidden_dim = 100
+    try:
+        model = LanguageModel(len(vocab), embedding_dim=50, hidden_dim=100)
+        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
+        model.eval()
+        return model
+    except Exception as e:
+        st.error(f"An error occurred while loading the model: {e}")
+        return None
 
 # Generate text with pre-trained model
 model = load_pretrained_model()  # Load the model
 
-# Text generation
-start_text = st.text_input("Enter the start text for text generation", "harry potter is")
-if st.button("Generate Text"):
-    generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
-    st.write("Generated Text:")
-    st.write(generated_text)
+if model:
+    # Text generation
+    start_text = st.text_input("Enter the start text for text generation", "harry potter is")
+    if st.button("Generate Text"):
+        with st.spinner('Generating text...'):
+            generated_text = generate_text(model, start_text, max_length=50, word2index=word2index, index2word=index2word)
+        st.write("Generated Text:")
+        st.write(generated_text)
+else:
+    st.error("Failed to load the pre-trained model.")
