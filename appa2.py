@@ -97,7 +97,7 @@ st.title("Text Generation with Pre-trained LSTM")
 
 # GitHub Repo URL for model and dataset
 github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'
-github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset%20(1).txt'
+correct_github_dataset_url = 'YOUR_CORRECT_DATASET_URL'  # Replace with the correct dataset URL
 
 # Local paths
 model_path = 'model.pth'
@@ -111,7 +111,7 @@ if not os.path.exists(model_path):
 
 if not os.path.exists(dataset_path):
     with open(dataset_path, 'wb') as f:
-        f.write(requests.get(github_dataset_url).content)
+        f.write(requests.get(correct_github_dataset_url).content)
     st.write("Dataset downloaded successfully.")
 
 # Load dataset and preprocess it
