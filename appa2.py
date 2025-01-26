@@ -97,7 +97,7 @@ st.title("Text Generation with Pre-trained LSTM")
 
 # GitHub Repo URL for model and dataset
 github_model_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/model.pth'
-correct_github_dataset_url = 'YOUR_CORRECT_DATASET_URL'  # Replace with the correct dataset URL
+correct_github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob/main/dataset%20(1).txt'  # Replace with the correct dataset URL
 
 # Local paths
 model_path = 'model.pth'
