@@ -101,7 +101,7 @@ correct_github_dataset_url = 'https://github.com/Laiba45362/NLP_st125496_A2/blob
 
 # Local paths
 model_path = 'model.pth'
-dataset_path = 'dataset.txt'
+dataset_path = 'dataset(1).txt'
 
 # Download model and dataset from GitHub if they are not available locally
 if not os.path.exists(model_path):
